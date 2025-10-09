@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=%{name}
+Comment=%{description}
+Exec=%{executable}
+Icon=%{executable}
+Terminal=false
+Type=Application
+Categories=Game;
+StartupWMClass=XIVLauncher.Core
