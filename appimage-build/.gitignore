@@ -1,0 +1,7 @@
+src/
+tools/
+build/
+appdir/
+.cache/
+*.AppImage
+*.zsync
