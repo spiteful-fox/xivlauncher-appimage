@@ -5,7 +5,7 @@ set -euo pipefail
 APP_NAME="XIVLauncher-RB"
 APPIMAGE_NAME="$APP_NAME-x86_64.AppImage"
 APPIMAGE_URL="https://github.com/spiteful-fox/xivlauncher-appimage/releases/latest/download/$APPIMAGE_NAME"
-APPIMAGE_PATH="/tmp/$APPIMAGE_NAME"
+APPIMAGE_PATH="$(mktemp -d)/$APPIMAGE_NAME"
 
 if ! flatpak list --app | grep -q "it.mijorus.gearlever"; then
     echo "Gear Lever flatpak not found. Installing system-wide..."
@@ -23,5 +23,5 @@ else
     chmod +x "$APPIMAGE_PATH"
 
     echo "Integrating $APPIMAGE_NAME with Gear Lever..."
-    yes | flatpak run it.mijorus.gearlever --integrate "$APPIMAGE_PATH"
+    flatpak run it.mijorus.gearlever "$APPIMAGE_PATH"
 fi
