@@ -18,26 +18,33 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     require "fileutils"; include FileUtils
     require "pathname"
 
+    CONFIG_NAME = "{{ config-name }}"
+
     class String
       def relative_to(resolve)
         Pathname.new(self).relative_path_from(resolve).to_s
       end
     end
 
-    XIVLAUNCHER_EXEC_NAME = `just get-config-value {{ config-name }} executable`.strip
-    XIVLAUNCHER_VERSION = `just get-config-value {{ config-name }} version`.strip
-    XIVLAUNCHER_SOURCE = `just get-config-value {{ config-name }} src`.strip
-    XIVLAUNCHER_NAME = `just get-config-value {{ config-name }} name`.strip
-    XIVLAUNCHER_DESC = `just get-config-value {{ config-name }} description`.strip
-    XIVLAUNCHER_UPDATE_URL = `just get-config-value {{ config-name }} update_url`.strip
+    def gcv(key)
+      `just get-config-value #{CONFIG_NAME} #{key}`.strip
+    end
+
+    XIVLAUNCHER_EXEC_NAME = gcv("executable")
+    XIVLAUNCHER_VERSION = gcv("version")
+    XIVLAUNCHER_SOURCE = gcv("src")
+    XIVLAUNCHER_NAME = gcv("name")
+    XIVLAUNCHER_DESC = gcv("description")
+    XIVLAUNCHER_UPDATE_URL = gcv("update_url")
 
     APPDIR = File.join(Dir.pwd, "appdir", XIVLAUNCHER_EXEC_NAME)
     INSTALL_PATH = File.join(APPDIR, "opt", XIVLAUNCHER_EXEC_NAME)
     DESKTOP_FILE_PATH = File.join(APPDIR, "usr", "share", "applications", "#{XIVLAUNCHER_EXEC_NAME}.desktop")
     ICON_PATH = File.join(APPDIR, "usr", "share", "icons", "#{XIVLAUNCHER_EXEC_NAME}.png")
+    OUTPUT_DIR = File.join(Dir.pwd, "output"); mkdir_p OUTPUT_DIR
 
     BINDIR = File.join(APPDIR, "usr", "bin")
-    EXECUTABLE_INSTALL_PATH = File.join(BINDIR, XIVLAUNCHER_EXEC_NAME)
+    EXECUTABLE_INSTALL_PATH = File.join(APPDIR, "AppRun") #File.join(BINDIR, XIVLAUNCHER_EXEC_NAME)
     BUSYBOX_INSTALL_PATH = File.join(BINDIR, "busybox")
 
     UPDATE_DATA = "gh-releases-zsync|spiteful-fox|xivlauncher-appimage|latest|#{XIVLAUNCHER_NAME}-x86_64.AppImage.zsync"
@@ -71,12 +78,11 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     ["libjxr0", "libsdl2-2.0-0", "libsecret-1-0", "libicu-dev"].each{|l| `just copy-package-libraries #{l} #{XIVLAUNCHER_EXEC_NAME}`}
 
 
-    ln_sf EXECUTABLE_INSTALL_PATH.relative_to(APPDIR), File.join(APPDIR, "AppRun")
     ln_sf DESKTOP_FILE_PATH.relative_to(APPDIR), File.join(APPDIR, "#{XIVLAUNCHER_EXEC_NAME}.desktop")
     ln_sf ICON_PATH.relative_to(APPDIR), File.join(APPDIR, "#{XIVLAUNCHER_EXEC_NAME}.png")
 
-    `"{{ appimagetool }}.d/AppRun" -u "#{UPDATE_DATA}" "#{APPDIR}" "#{File.join("output", XIVLAUNCHER_NAME + "-{{ arch() }}.AppImage")}"`
-    Dir["*.zsync"].each{|f|mv f, "output"}
+    `"{{ appimagetool }}.d/AppRun" -u "#{UPDATE_DATA}" "#{APPDIR}" "#{File.join(OUTPUT_DIR, XIVLAUNCHER_NAME + "-{{ arch() }}.AppImage")}"`
+    Dir["*.zsync"].each{|f|mv f, OUTPUT_DIR}
 
 copy-dependencies source-object config-name:
     #!/usr/bin/env ruby
@@ -86,7 +92,7 @@ copy-dependencies source-object config-name:
     mkdir_p LIBDIR
     SEARCHED_FILES = []
     EXCLUDED_LIBRARIES = [
-      ["c", "stdc++", "dl", "rt", "pthread", "m"],
+      ["c", "stdc++", "dl", "rt", "pthread", "m", "gcc_s"],
       ["wayland-client", "wayland-cursor", "wayland-egl", "wayland-server"],
       ["xcb", "xkbcommon", "X11", "X11-xcb", "Xau", "Xcursor", "Xdmcp", "Xext", "Xfixes", "Xi", "Xrandr", "Xrender", "Xss"]
     ].flatten.map{|i|"lib"+i}
@@ -192,4 +198,4 @@ get-config-value name key:
     puts JSON.parse(File.read("{{ config_file }}"))["{{ name }}"]["{{ key }}"].to_s
 
 clean:
-    rm -rf *.AppImage *.zsync tools appdir src .cache
+    rm -rf *.AppImage *.zsync tools appdir src .cache output
