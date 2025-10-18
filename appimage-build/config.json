@@ -8,7 +8,7 @@
     "update_url": ""
   },
   "xivlauncher-rb": {
-    "version": "1.2.1.4",
+    "version": "1.2.1.5",
     "src": "https://github.com/rankynbass/XIVLauncher.Core/releases/download/rb-v%{version}/XIVLauncher.Core.tar.gz",
     "name": "XIVLauncher-RB",
     "executable": "xivlauncher-rb",
