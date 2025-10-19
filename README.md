@@ -9,11 +9,11 @@ They're just AppImages, so you could simply head to the releases page, download 
 From a terminal, you could install it automatically with:
 
 ```sh
-bash <(curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh)
+curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh | bash
 ```
 or, for XIVLauncher-RB:
 ```sh
-bash <(curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install-rb.sh)
+curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install-rb.sh | bash -s --rb
 ```
 
 #### Building
