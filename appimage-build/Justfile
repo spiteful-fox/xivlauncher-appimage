@@ -3,6 +3,7 @@ set shell := ["bash", "-c"]
 wget := require("wget")
 dpkg_query := require("dpkg-query")
 ldd := require("ldd")
+git := require("git")
 tool_dir := absolute_path("tools")
 appimagetool := tool_dir + "/appimagetool"
 aria2c := tool_dir + "/aria2c"
@@ -62,7 +63,8 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     desktop_file = File.read(File.join("resources", "xivlauncher.desktop")) % {
       name: XIVLAUNCHER_NAME,
       description: XIVLAUNCHER_DESC,
-      executable: XIVLAUNCHER_EXEC_NAME
+      executable: XIVLAUNCHER_EXEC_NAME,
+      appimage_version: XIVLAUNCHER_VERSION + " (#{`"{{ git }}" describe --tags`.strip})"
     }
     File.write(DESKTOP_FILE_PATH, desktop_file)
 

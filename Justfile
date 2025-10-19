@@ -7,7 +7,7 @@ default:
 build config-name="xivlauncher" rebuild="false": (build-image rebuild)
     mkdir -p output
     "{{ podman }}" run --rm \
-        -v $(pwd)/output:/build/output \
+        -v $(pwd)/output:/src/appimage-build/output \
         xivlauncher-appimage-builder create-appimage {{ config-name }}
 
 build-image rebuild="false":

@@ -2,6 +2,7 @@ FROM debian:12
 
 RUN apt-get update && apt-get install -y \
     file \
+    git \
     ruby \
     wget \
     curl \
@@ -17,9 +18,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 
-WORKDIR /build
+COPY . /src
 
-COPY appimage-build/ /build/
+WORKDIR /src/appimage-build
 
 ENTRYPOINT ["just"]
 CMD ["create-appimage", "xivlauncher"]

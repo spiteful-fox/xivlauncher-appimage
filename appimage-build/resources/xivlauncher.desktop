@@ -7,3 +7,4 @@ Terminal=false
 Type=Application
 Categories=Game;
 StartupWMClass=XIVLauncher.Core
+X-AppImage-Version=%{appimage_version}
