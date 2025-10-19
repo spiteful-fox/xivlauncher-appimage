@@ -3,7 +3,7 @@
 set -euo pipefail
 
 APP_NAME=""
-if [ "${1-''}" = "--rb" ]; then
+if [ "${1-''}" = "rb" ]; then
     APP_NAME="XIVLauncher-RB"
 else
     APP_NAME="XIVLauncher"

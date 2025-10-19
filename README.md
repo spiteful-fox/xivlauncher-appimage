@@ -4,16 +4,16 @@ Unofficial AppImage builds of [XIVLauncher](https://github.com/goatcorp/XIVLaunc
 
 #### Installing
 
-They're just AppImages, so you could simply head to the releases page, download them, and run them directly. You could also use something like [Gear Lever](https://flathub.org/en/apps/it.mijorus.gearlever) to install them (which I recommend doing).
+They're just AppImages, so you could simply head to the [releases page](https://github.com/spiteful-fox/xivlauncher-appimage/releases), download them, and run them directly. You could also use something like [Gear Lever](https://flathub.org/en/apps/it.mijorus.gearlever) to install them (which I recommend doing).
 
-From a terminal, you could install it automatically with:
+From a terminal, assuming [Flatpak is already installed](https://flatpak.org/setup/), you can install both Gear Lever and this AppImage with:
 
 ```sh
 curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh | bash
 ```
 or, for XIVLauncher-RB:
 ```sh
-curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install-rb.sh | bash -s --rb
+curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh | bash -s rb
 ```
 
 #### Building
