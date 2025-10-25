@@ -1,4 +1,4 @@
-FROM debian:12
+FROM registry.gitlab.steamos.cloud/steamrt/sniper/sdk
 
 RUN apt-get update && apt-get install -y \
     file \
@@ -22,5 +22,5 @@ COPY . /src
 
 WORKDIR /src/appimage-build
 
-ENTRYPOINT ["just"]
+ENTRYPOINT ["/usr/local/bin/just"]
 CMD ["create-appimage", "xivlauncher"]
