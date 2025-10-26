@@ -30,35 +30,49 @@ if flatpak list --app --system --user | grep -q "$GEARLEVER_ID"; then
 else
     echo "Gear Lever flatpak not found. Installing..."
 
-    # Try system-level installation first (the way Bazzite does things)
+    # Ask for superuser permissions first
+    SYSTEM_INSTALL=false
     if [ "$(id -u)" -ne 0 ]; then  # Not running as root
-        echo "Attempting system-wide installation with sudo..."
-        if sudo -n true 2>/dev/null || sudo -v; then  # Check if we can get sudo or prompt for it
-            # Add flathub repository to system if not present
-            if ! flatpak remote-list --system | grep -q "$FLATPAK_REPO_NAME"; then
-                echo "Adding $FLATPAK_REPO_NAME repository to system..."
-                sudo flatpak remote-add --system --if-not-exists $FLATPAK_REPO_NAME $FLATPAK_REPO_URL
+        echo "Gear Lever can be installed system-wide (requires superuser) or user-wide."
+        read -p "Install system-wide? This requires superuser permissions. (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            if sudo -n true 2>/dev/null; then
+                # Already have sudo access
+                SYSTEM_INSTALL=true
+            else
+                # Try to get sudo access
+                if sudo -v 2>/dev/null; then
+                    SYSTEM_INSTALL=true
+                else
+                    echo "Superuser permissions not granted. Installing Gear Lever at user level..."
+                fi
             fi
-            echo "Installing Gear Lever at system level..."
-            sudo flatpak install --system -y $FLATPAK_REPO_NAME $GEARLEVER_ID
         else
-            echo "Sudo permissions not granted. Installing Gear Lever at user level..."
-            # Add flathub repository to user if not present
-            if ! flatpak remote-list --user | grep -q "$FLATPAK_REPO_NAME"; then
-                echo "Adding $FLATPAK_REPO_NAME repository to user..."
-                flatpak remote-add --user --if-not-exists $FLATPAK_REPO_NAME $FLATPAK_REPO_URL
-            fi
             echo "Installing Gear Lever at user level..."
-            flatpak install --user -y $FLATPAK_REPO_NAME $GEARLEVER_ID
         fi
-    else  # Running as root, install directly to system
+    else
+        # Running as root, install to system
+        SYSTEM_INSTALL=true
+    fi
+
+    # Install Gear Lever based on the decision above
+    if [ "$SYSTEM_INSTALL" = true ]; then
         # Add flathub repository to system if not present
         if ! flatpak remote-list --system | grep -q "$FLATPAK_REPO_NAME"; then
             echo "Adding $FLATPAK_REPO_NAME repository to system..."
-            flatpak remote-add --system --if-not-exists $FLATPAK_REPO_NAME $FLATPAK_REPO_URL
+            sudo flatpak remote-add --system --if-not-exists $FLATPAK_REPO_NAME $FLATPAK_REPO_URL
         fi
-        echo "Installing Gear Lever at system level (running as root)..."
-        flatpak install --system -y $FLATPAK_REPO_NAME $GEARLEVER_ID
+        echo "Installing Gear Lever at system level..."
+        sudo flatpak install --system -y $FLATPAK_REPO_NAME $GEARLEVER_ID
+    else
+        # Add flathub repository to user if not present
+        if ! flatpak remote-list --user | grep -q "$FLATPAK_REPO_NAME"; then
+            echo "Adding $FLATPAK_REPO_NAME repository to user..."
+            flatpak remote-add --user --if-not-exists $FLATPAK_REPO_NAME $FLATPAK_REPO_URL
+        fi
+        echo "Installing Gear Lever at user level..."
+        flatpak install --user -y $FLATPAK_REPO_NAME $GEARLEVER_ID
     fi
 fi
 
