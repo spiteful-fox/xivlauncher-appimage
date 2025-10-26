@@ -34,9 +34,11 @@ jobs:
 
       - name: Tag current commit
         id: tag
-        if: github.event_name != 'push'
         run: |
           TAG=$(just tag-commit)
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            TAG="$TAG.$(date +%H%M%S)"
+          fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Created tag: $TAG"
 
