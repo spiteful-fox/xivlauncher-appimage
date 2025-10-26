@@ -96,7 +96,8 @@ copy-dependencies source-object config-name:
     EXCLUDED_LIBRARIES = [
       ["c", "stdc++", "dl", "rt", "pthread", "m", "gcc_s"],
       ["wayland-client", "wayland-cursor", "wayland-egl", "wayland-server"],
-      ["xcb", "xkbcommon", "X11", "X11-xcb", "Xau", "Xcursor", "Xdmcp", "Xext", "Xfixes", "Xi", "Xrandr", "Xrender", "Xss"]
+      ["xcb", "xkbcommon", "X11", "X11-xcb", "Xau", "Xcursor", "Xdmcp", "Xext", "Xfixes", "Xi", "Xrandr", "Xrender", "Xss"],
+      ["drm"]
     ].flatten.map{|i|"lib"+i}
 
     def get_deps(src)

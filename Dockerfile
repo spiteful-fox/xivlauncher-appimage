@@ -1,4 +1,4 @@
-FROM registry.gitlab.steamos.cloud/steamrt/sniper/sdk
+FROM debian:11
 
 RUN apt-get update && apt-get install -y \
     file \
