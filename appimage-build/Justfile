@@ -94,7 +94,7 @@ copy-dependencies source-object config-name:
     mkdir_p LIBDIR
     SEARCHED_FILES = []
     EXCLUDED_LIBRARIES = [
-      ["c", "stdc++", "dl", "rt", "pthread", "m", "gcc_s"],
+      ["c", "stdc++", "dl", "rt", "pthread", "m", "gcc_s", "z", "zstd"],
       ["wayland-client", "wayland-cursor", "wayland-egl", "wayland-server"],
       ["xcb", "xkbcommon", "X11", "X11-xcb", "Xau", "Xcursor", "Xdmcp", "Xext", "Xfixes", "Xi", "Xrandr", "Xrender", "Xss"],
       ["drm"]
