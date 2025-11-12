@@ -33,8 +33,10 @@ else
     # Ask for superuser permissions first
     SYSTEM_INSTALL=false
     if [ "$(id -u)" -ne 0 ]; then  # Not running as root
-        echo "Gear Lever can be installed system-wide (requires superuser) or user-wide."
-        read -p "Install system-wide? This requires superuser permissions. (y/N): " -n 1 -r
+        echo "Gear Lever can be installed system-wide or user-wide."
+        echo "Some distributions (like Bazzite) may already prefer system-wide Flatpak installations."
+        echo "Installing a Flatpak system-wide requires sudo."
+        read -p "Install system-wide? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             if sudo -n true 2>/dev/null; then

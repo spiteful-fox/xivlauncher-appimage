@@ -16,8 +16,6 @@ or, for XIVLauncher-RB:
 curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh | bash -s rb
 ```
 
-First, a system-level installation of Gear Lever will be attempted. If that doesn't work (no sudo), it will be installed at the user level instead.
-
 #### Building
 
 ##### Requirements:
