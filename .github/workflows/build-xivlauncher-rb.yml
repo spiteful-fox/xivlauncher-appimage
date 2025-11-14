@@ -1,4 +1,4 @@
-name: Build AppImages
+name: Build AppImage (XIVLauncher-RB)
 
 on:
   push:
@@ -35,11 +35,12 @@ jobs:
       - name: Tag current commit
         id: tag
         run: |
-          TAG=$(just tag-commit)
+          TAG=$(just tag-commit xivlauncher-rb)
           if [ "$GITHUB_EVENT_NAME" = "push" ]; then
             TAG="$TAG.$(date +%H%M%S)"
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "artifact_tag=$(echo $TAG | sed -r 's/\//_/g')" >> $GITHUB_OUTPUT
           echo "Created tag: $TAG"
 
       - name: Push tag to GitHub
@@ -50,15 +51,12 @@ jobs:
       - name: Build container image
         run: just build-image
 
-      - name: Build xivlauncher AppImage
-        run: just build xivlauncher
-
-      - name: Build xivlauncher-rb AppImage
+      - name: Build XIVLauncher-RB AppImage
         run: just build xivlauncher-rb
 
       - name: Upload AppImage artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: xivlauncher-appimages-${{ steps.tag.outputs.tag }}
+          name: appimage-${{ steps.tag.outputs.artifact_tag }}
           path: output/
           retention-days: 30

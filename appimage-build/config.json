@@ -3,16 +3,16 @@
     "version": "1.2.1",
     "src": "https://github.com/goatcorp/XIVLauncher.Core/releases/download/%{version}/XIVLauncher.Core.tar.gz",
     "name": "XIVLauncher",
+    "short_name": "official",
     "executable": "xivlauncher",
-    "description": "Custom launcher for Final Fantasy XIV.",
-    "update_url": ""
+    "description": "Custom launcher for Final Fantasy XIV."
   },
   "xivlauncher-rb": {
     "version": "1.2.1.5",
     "src": "https://github.com/rankynbass/XIVLauncher.Core/releases/download/rb-v%{version}/XIVLauncher.Core.tar.gz",
     "name": "XIVLauncher-RB",
+    "short_name": "rb",
     "executable": "xivlauncher-rb",
-    "description": "Custom launcher for Final Fantasy XIV. Custom fork by RankynBass.",
-    "update_url": ""
+    "description": "Custom launcher for Final Fantasy XIV. Custom fork by RankynBass."
   }
 }

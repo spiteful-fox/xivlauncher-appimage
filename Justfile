@@ -41,14 +41,21 @@ clean:
     echo "Removing output folder..."
     rm -rf output
 
-
 # Creates a git tag according to the current date, or a given tag.
 [group('git')]
-tag-commit tag="":
+tag-commit config-name custom-tag="":
     #!/usr/bin/env ruby
+    require 'json'
+    config = JSON.parse(File.read(File.join(Dir.pwd, "appimage-build", "config.json")))["{{ config-name }}"]
+    prefix = config["short_name"]
+    full_tag = "#{config["short_name"]}/#{config["version"]}/"
     tags = `"{{ git }}" tag`.split.map(&:strip)
-    new_tag = "{{ tag }}".empty? ? Time.now.strftime("%Y-%m-%d") : "{{ tag }}"
-    tags.reject!{|i| /^#{new_tag}(\.(\d+))*$/.match(i).nil?}
-    new_tag += ".#{tags.length}" if tags.length > 0
-    `"{{ git }}" tag #{new_tag}`
-    puts new_tag
+    if "{{ custom-tag }}".empty?
+      full_tag += Time.now.strftime("%Y-%m-%d")
+    else
+      full_tag += "{{ custom-tag }}"
+    end
+    tags.reject!{|i| /^#{full_tag}(\.(\d+))*$/.match(i).nil?}
+    full_tag += ".#{tags.length}" if tags.length > 0
+    `"{{ git }}" tag #{full_tag}`
+    puts full_tag

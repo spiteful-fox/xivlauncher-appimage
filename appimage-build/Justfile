@@ -35,6 +35,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     XIVLAUNCHER_VERSION = gcv("version")
     XIVLAUNCHER_SOURCE = gcv("src")
     XIVLAUNCHER_NAME = gcv("name")
+    XIVLAUNCHER_SHORT_NAME = gcv("short_name")
     XIVLAUNCHER_DESC = gcv("description")
     XIVLAUNCHER_UPDATE_URL = gcv("update_url")
 
@@ -64,7 +65,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
       name: XIVLAUNCHER_NAME,
       description: XIVLAUNCHER_DESC,
       executable: XIVLAUNCHER_EXEC_NAME,
-      appimage_version: XIVLAUNCHER_VERSION + " (#{`"{{ git }}" describe --tags`.strip})"
+      appimage_version: "#{`"{{ git }}" describe --tags --match "#{XIVLAUNCHER_SHORT_NAME}*"`.strip.sub("#{XIVLAUNCHER_SHORT_NAME}/", "")}"
     }
     File.write(DESKTOP_FILE_PATH, desktop_file)
 
