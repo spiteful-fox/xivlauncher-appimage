@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     zsync \
+    patchelf \
     fuse3 \
     libjxr0 \
     libsdl2-2.0-0 \

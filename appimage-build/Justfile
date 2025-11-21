@@ -4,6 +4,7 @@ wget := require("wget")
 dpkg_query := require("dpkg-query")
 ldd := require("ldd")
 git := require("git")
+patchelf := require("patchelf")
 tool_dir := absolute_path("tools")
 appimagetool := tool_dir + "/appimagetool"
 aria2c := tool_dir + "/aria2c"
@@ -31,6 +32,11 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
       `just get-config-value #{CONFIG_NAME} #{key}`.strip
     end
 
+    def set_rpath(obj, rpath)
+      puts "set_rpath (#{obj}): #{rpath}"
+      `{{ patchelf }} --set-rpath "#{rpath}" "#{obj}"`
+    end
+
     XIVLAUNCHER_EXEC_NAME = gcv("executable")
     XIVLAUNCHER_VERSION = gcv("version")
     XIVLAUNCHER_SOURCE = gcv("src")
@@ -46,6 +52,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     OUTPUT_DIR = File.join(Dir.pwd, "output"); mkdir_p OUTPUT_DIR
 
     BINDIR = File.join(APPDIR, "usr", "bin")
+    LIBDIR = File.join(APPDIR, "usr", "lib")
     EXECUTABLE_INSTALL_PATH = File.join(APPDIR, "AppRun") #File.join(BINDIR, XIVLAUNCHER_EXEC_NAME)
     BUSYBOX_INSTALL_PATH = File.join(BINDIR, "busybox")
 
@@ -80,6 +87,8 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
 
     ["libjxr0", "libsdl2-2.0-0", "libsecret-1-0", "libicu-dev"].each{|l| `just copy-package-libraries #{l} #{XIVLAUNCHER_EXEC_NAME}`}
 
+    Dir["#{LIBDIR}/*"].each{|f| set_rpath(f, "$ORIGIN")}
+    set_rpath(File.join(INSTALL_PATH, "XIVLauncher.Core"), "$ORIGIN/../../usr/lib")
 
     ln_sf DESKTOP_FILE_PATH.relative_to(APPDIR), File.join(APPDIR, "#{XIVLAUNCHER_EXEC_NAME}.desktop")
     ln_sf ICON_PATH.relative_to(APPDIR), File.join(APPDIR, "#{XIVLAUNCHER_EXEC_NAME}.png")
