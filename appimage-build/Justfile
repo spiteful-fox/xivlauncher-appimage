@@ -43,7 +43,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     XIVLAUNCHER_NAME = gcv("name")
     XIVLAUNCHER_SHORT_NAME = gcv("short_name")
     XIVLAUNCHER_DESC = gcv("description")
-    XIVLAUNCHER_UPDATE_URL = gcv("update_url")
+    XIVLAUNCHER_RELEASE_TYPE = gcv("release_type")
 
     APPDIR = File.join(Dir.pwd, "appdir", XIVLAUNCHER_EXEC_NAME)
     INSTALL_PATH = File.join(APPDIR, "opt", XIVLAUNCHER_EXEC_NAME)
@@ -56,7 +56,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     EXECUTABLE_INSTALL_PATH = File.join(APPDIR, "AppRun") #File.join(BINDIR, XIVLAUNCHER_EXEC_NAME)
     BUSYBOX_INSTALL_PATH = File.join(BINDIR, "busybox")
 
-    UPDATE_DATA = "gh-releases-zsync|spiteful-fox|xivlauncher-appimage|latest|#{XIVLAUNCHER_NAME}-x86_64.AppImage.zsync"
+    UPDATE_DATA = "gh-releases-zsync|spiteful-fox|xivlauncher-appimage|#{XIVLAUNCHER_RELEASE_TYPE}|#{XIVLAUNCHER_NAME}-x86_64.AppImage.zsync"
 
     mkdir_p File.join(Dir.pwd, "appdir")
     cp_r "AppDir.template", APPDIR
