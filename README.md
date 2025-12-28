@@ -9,11 +9,11 @@ They're just AppImages, so you could simply head to the [releases page](https://
 From a terminal, assuming [Flatpak is already installed](https://flatpak.org/setup/), you can install both Gear Lever and this AppImage with:
 
 ```sh
-curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh | bash
+curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/install-script/install.sh | bash
 ```
 or, for XIVLauncher-RB:
 ```sh
-curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/main/install.sh | bash -s rb
+curl -s https://raw.githubusercontent.com/spiteful-fox/xivlauncher-appimage/refs/heads/install-script/install.sh | bash -s rb
 ```
 
 #### Building
