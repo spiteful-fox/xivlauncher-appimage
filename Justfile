@@ -10,7 +10,7 @@ build_image := "xivlauncher-appimage-builder"
 build config-name="xivlauncher" rebuild="false": (build-image rebuild)
     mkdir -p output
     "{{ podman }}" run --rm \
-        -v $(pwd)/output:/src/appimage-build/output \
+        -v $(pwd)/output:/src/appimage-build/output:z \
         xivlauncher-appimage-builder create-appimage {{ config-name }}
 
 # Build or rebuild the container image used for building the AppImage.

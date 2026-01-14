@@ -1,20 +1,22 @@
 {
-    "xivlauncher": {
-        "version": "1.3.1",
-        "src": "https://github.com/goatcorp/XIVLauncher.Core/releases/download/%{version}/XIVLauncher.Core.tar.gz",
-        "release_type": "latest",
-        "name": "XIVLauncher",
-        "short_name": "official",
-        "executable": "xivlauncher",
-        "description": "Custom launcher for Final Fantasy XIV."
-    },
-    "xivlauncher-rb": {
-        "version": "1.3.1.1-beta3",
-        "src": "https://github.com/rankynbass/XIVLauncher.Core/releases/download/rb-v%{version}/XIVLauncher.Core.tar.gz",
-        "release_type": "latest-pre",
-        "name": "XIVLauncher-RB",
-        "short_name": "rb",
-        "executable": "xivlauncher-rb",
-        "description": "Custom launcher for Final Fantasy XIV. Custom fork by RankynBass."
-    }
+  "xivlauncher": {
+    "version": "1.3.1",
+    "src": "https://github.com/goatcorp/XIVLauncher.Core/releases/download/%{version}/XIVLauncher.Core.tar.gz",
+    "release_type": "latest",
+    "name": "XIVLauncher",
+    "short_name": "official",
+    "executable": "xivlauncher",
+    "description": "Custom launcher for Final Fantasy XIV.",
+    "packages": "libsdl2-dev;"
+  },
+  "xivlauncher-rb": {
+    "version": "1.3.1.1-beta3",
+    "src": "https://github.com/rankynbass/XIVLauncher.Core/releases/download/rb-v1.3.1.1-beta2/XIVLauncher.Core.tar.gz",
+    "release_type": "latest-pre",
+    "name": "XIVLauncher-RB",
+    "short_name": "rb",
+    "executable": "xivlauncher-rb",
+    "description": "Custom launcher for Final Fantasy XIV. Custom fork by RankynBass.",
+    "packages": "libsdl3-dev;"
+  }
 }

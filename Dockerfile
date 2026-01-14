@@ -1,4 +1,4 @@
-FROM debian:11
+FROM registry.gitlab.steamos.cloud/steamrt/sniper/sdk
 
 RUN apt-get update && apt-get install -y \
     file \
@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y \
     patchelf \
     fuse3 \
     libjxr0 \
-    libsdl2-2.0-0 \
-    libsecret-1-0 \
+    libsdl2-dev \
+    libsdl3-dev \
+    libsecret-1-dev \
     libicu-dev \
     dpkg-dev \
     && rm -rf /var/lib/apt/lists/*

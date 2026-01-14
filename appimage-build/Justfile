@@ -44,6 +44,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     XIVLAUNCHER_SHORT_NAME = gcv("short_name")
     XIVLAUNCHER_DESC = gcv("description")
     XIVLAUNCHER_RELEASE_TYPE = gcv("release_type")
+    XIVLAUNCHER_PACKAGES = gcv("packages").split(";")
 
     APPDIR = File.join(Dir.pwd, "appdir", XIVLAUNCHER_EXEC_NAME)
     INSTALL_PATH = File.join(APPDIR, "opt", XIVLAUNCHER_EXEC_NAME)
@@ -85,7 +86,8 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
       chmod_R "+x", File.join(APPDIR, "usr", "lib")
     end
 
-    ["libjxr0", "libsdl2-2.0-0", "libsecret-1-0", "libicu-dev"].each{|l| `just copy-package-libraries #{l} #{XIVLAUNCHER_EXEC_NAME}`}
+
+    ["libjxr-dev", "libsecret-1-dev", "libicu-dev", XIVLAUNCHER_PACKAGES].flatten.each{|l| `just copy-package-libraries #{l} #{XIVLAUNCHER_EXEC_NAME}`}
 
     Dir["#{LIBDIR}/*"].each{|f| set_rpath(f, "$ORIGIN")}
     set_rpath(File.join(INSTALL_PATH, "XIVLauncher.Core"), "$ORIGIN/../../usr/lib")
