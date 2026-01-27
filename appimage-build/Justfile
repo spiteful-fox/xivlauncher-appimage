@@ -4,13 +4,16 @@ wget := require("wget")
 dpkg_query := require("dpkg-query")
 ldd := require("ldd")
 git := require("git")
+gcc := require("g++")
 patchelf := require("patchelf")
 tool_dir := absolute_path("tools")
+src_dir := absolute_path("src")
 appimagetool := tool_dir + "/appimagetool"
 aria2c := tool_dir + "/aria2c"
 busybox := tool_dir + "/busybox"
 config_file := absolute_path("config.json")
 cache_dir := absolute_path(".cache")
+imgui_version := "v1.92.2b-docking"
 
 @default:
     just --list
@@ -28,8 +31,13 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
       end
     end
 
-    def gcv(key)
-      `just get-config-value #{CONFIG_NAME} #{key}`.strip
+    def gcv(key, optional=false)
+      str = `just get-config-value #{CONFIG_NAME} #{key}` rescue nil
+      if str.is_a?(String) && !str.empty?
+        return str.strip
+      end
+      raise StandardError, "no key '#{key}' found for config #{CONFIG_NAME}" unless optional
+      nil
     end
 
     def set_rpath(obj, rpath)
@@ -44,7 +52,8 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     XIVLAUNCHER_SHORT_NAME = gcv("short_name")
     XIVLAUNCHER_DESC = gcv("description")
     XIVLAUNCHER_RELEASE_TYPE = gcv("release_type")
-    XIVLAUNCHER_PACKAGES = gcv("packages").split(";")
+    XIVLAUNCHER_PACKAGES = gcv("packages", true)&.split(";").map(&:strip) || []
+    XIVLAUNCHER_REMOVE_FILES = gcv("remove_files", true)&.split(";").map(&:strip) || []
 
     APPDIR = File.join(Dir.pwd, "appdir", XIVLAUNCHER_EXEC_NAME)
     INSTALL_PATH = File.join(APPDIR, "opt", XIVLAUNCHER_EXEC_NAME)
@@ -81,6 +90,13 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     File.write(EXECUTABLE_INSTALL_PATH, executable)
     chmod "+x", EXECUTABLE_INSTALL_PATH
 
+    XIVLAUNCHER_REMOVE_FILES.map{|f| File.join(INSTALL_PATH, f)}.each{|f| rm_rf f}
+
+    if XIVLAUNCHER_REMOVE_FILES.include?("cimgui.so") || XIVLAUNCHER_REMOVE_FILES.include?("ImGuiImplSDL3.so")
+      `just download-imgui`
+      Dir["{{ src_dir }}/_build/*.so"].each{|f| cp f, INSTALL_PATH}
+    end
+
     [File.join(INSTALL_PATH, "XIVLauncher.Core"), Dir["#{INSTALL_PATH}/**/*.so"]].flatten.each do |obj|
       `just copy-dependencies "#{obj}" #{XIVLAUNCHER_EXEC_NAME}`
       chmod_R "+x", File.join(APPDIR, "usr", "lib")
@@ -90,6 +106,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     ["libjxr-dev", "libsecret-1-dev", "libicu-dev", XIVLAUNCHER_PACKAGES].flatten.each{|l| `just copy-package-libraries #{l} #{XIVLAUNCHER_EXEC_NAME}`}
 
     Dir["#{LIBDIR}/*"].each{|f| set_rpath(f, "$ORIGIN")}
+    Dir["#{INSTALL_PATH}/*.so"].each{|f| set_rpath(f, "$ORIGIN/../../usr/lib")}
     set_rpath(File.join(INSTALL_PATH, "XIVLauncher.Core"), "$ORIGIN/../../usr/lib")
 
     ln_sf DESKTOP_FILE_PATH.relative_to(APPDIR), File.join(APPDIR, "#{XIVLAUNCHER_EXEC_NAME}.desktop")
@@ -138,14 +155,14 @@ copy-dependencies source-object config-name:
       end
     end
 
-copy-package-libraries package-name config-name:
+copy-package-libraries package-name config-name architecture="amd64":
     #!/usr/bin/env ruby
     require "fileutils"; include FileUtils
 
     LIBDIR = File.join(Dir.pwd, "appdir", "{{ config-name }}", "usr", "lib")
 
     objects = []
-    `{{ dpkg_query }} -L {{ package-name }}`.each_line do |line|
+    `{{ dpkg_query }} -L {{ package-name }}:{{ architecture }}`.each_line do |line|
       matchdata = /^(.+\.so(\.\d)*)$/.match(line.strip)
       if matchdata
         objects << matchdata.captures[0]
@@ -177,7 +194,8 @@ download config-name:
 
 download-appimagetool:
     #!/usr/bin/env bash
-    mkdir -p tools
+    set -ueox pipefail
+    mkdir -p "{{ tool_dir }}"
 
     if [ ! -f "{{ appimagetool }}" ]; then
         "{{ wget }}" "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-{{ arch() }}.AppImage" -O "{{ tool_dir }}/appimagetool"
@@ -191,7 +209,8 @@ download-appimagetool:
 
 download-aria2c:
     #!/usr/bin/env bash
-    mkdir -p tools
+    set -ueox pipefail
+    mkdir -p "{{ tool_dir }}"
 
     if [ ! -f "{{ aria2c }}" ]; then
         "{{ wget }}" -qO- "https://github.com/abcfy2/aria2-static-build/releases/download/continuous/aria2-x86_64-linux-musl_static.zip" | zcat > "{{ aria2c }}"
@@ -200,11 +219,69 @@ download-aria2c:
 
 download-busybox:
     #!/usr/bin/env bash
-    mkdir -p tools
+    set -ueox pipefail
+    mkdir -p "{{ tool_dir }}"
 
     if [ ! -f "{{ busybox }}" ]; then
         "{{ wget }}" https://github.com/ruanformigoni/busybox-static-musl/releases/download/7e2c5b6/busybox-x86_64 -O "{{ busybox }}"
         chmod +x "{{ busybox }}"
+    fi
+
+download-imgui:
+    #!/usr/bin/env bash
+    set -ueox pipefail
+
+    build_dir="{{ src_dir }}/_build"
+    mkdir -p "{{ src_dir }}"
+    mkdir -p "$build_dir"
+
+    cflags="-DIMGUI_USE_WCHAR32 -DIMGUI_ENABLE_FREETYPE=1 -DIMGUI_ENABLE_STB_TRUETYPE -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -fPIC -shared"
+    ldflags="-L$build_dir -Wl,--no-undefined"
+
+
+    if [ ! -d "{{ src_dir }}/imgui" ]; then
+        just git-clone https://github.com/ocornut/imgui {{ imgui_version }}
+    fi
+
+    cimgui_cflags="-DCIMGUI_FREETYPE=1 -DCIMGUI_VARGS0 $(pkg-config --cflags freetype2) $cflags"
+    cimgui_ldflags="$(pkg-config --libs freetype2) $ldflags"
+
+    if [ ! -x "$build_dir/cimgui.so" ]; then
+        if [ ! -d "{{ src_dir }}/cimgui" ]; then
+            just git-clone https://github.com/cimgui/cimgui docking_inter
+            rm -rf "{{ src_dir }}/cimgui/imgui"
+            ln -s "{{ src_dir }}/imgui" "{{ src_dir }}/cimgui/imgui"
+        fi
+        cd "{{ src_dir }}/cimgui"
+        (cd ./generator && ./generator.sh)
+        "{{ gcc }}" -o "$build_dir/cimgui.so" \
+        -I. -Iimgui -Iimgui/misc/freetype \
+        $cimgui_cflags \
+        imgui/imgui{,_draw,_widgets,_tables,_demo}.cpp \
+        imgui/misc/freetype/imgui_freetype.cpp \
+        {{ src_dir }}/cimgui/{cimgui,cimgui_impl}.cpp \
+        $cimgui_ldflags
+    fi
+
+    cimgui_impl_cflags="-DCIMGUI_USE_SDL3 -DCIMGUI_USE_SDL3Renderer -DCIMGUI_USE_SDLGPU3 $(pkg-config --cflags sdl3) $cimgui_cflags"
+    cimgui_impl_ldflags="$(pkg-config --libs sdl3) $cimgui_ldflags"
+
+    if [ ! -x "$build_dir/ImGuiImplSDL3.so" ]; then
+        if [ ! -d "{{ src_dir }}/cimgui_impl" ]; then
+            just git-clone https://github.com/HexaEngine/cimgui_impl
+            rm -rf "{{ src_dir }}/cimgui_impl/imgui"
+            ln -s "{{ src_dir }}/imgui" "{{ src_dir }}/cimgui_impl/imgui"
+        fi
+        cd "{{ src_dir }}/cimgui_impl"
+        "{{ gcc }}" \
+        -o "$build_dir/ImGuiImplSDL3.so" \
+        -Iimgui -Iimgui/backends -Iimgui/misc/freetype -Isrc -Iinclude \
+        $cimgui_impl_cflags \
+        src/cimgui_impl_{core,sdl3,sdl3renderer,sdlgpu3}.cpp \
+        imgui/backends/imgui_impl_{sdl3,sdlrenderer3,sdlgpu3}.cpp \
+        imgui/imgui{,_tables,_widgets,_draw,_demo}.cpp \
+        imgui/misc/freetype/imgui_freetype.cpp \
+        $cimgui_impl_ldflags
     fi
 
 get-config-value name key:
@@ -214,3 +291,9 @@ get-config-value name key:
 
 clean:
     rm -rf *.AppImage *.zsync tools appdir src .cache output
+
+[private]
+@git-clone url branch="main" extra-args="" dest-name="":
+    mkdir -p "{{ src_dir }}"
+    echo "Cloning {{ url }}..."
+    cd "{{ src_dir }}" && "{{ git }}" clone -q "{{ url }}" --depth 1 --single-branch --branch "{{ branch }}" {{ extra-args }} {{ dest-name }}

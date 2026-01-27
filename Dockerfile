@@ -10,9 +10,11 @@ RUN apt-get update && apt-get install -y \
     zsync \
     patchelf \
     fuse3 \
-    libjxr0 \
+    luajit \
+    libjxr-dev \
     libsdl2-dev \
     libsdl3-dev \
+    libsdl3-image-dev \
     libsecret-1-dev \
     libicu-dev \
     dpkg-dev \
