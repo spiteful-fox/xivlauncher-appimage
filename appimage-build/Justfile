@@ -18,7 +18,7 @@ imgui_version := "v1.92.2b-docking"
 @default:
     just --list
 
-create-appimage config-name="xivlauncher": download-aria2c download-appimagetool download-busybox (download config-name)
+create-appimage config-name="xivlauncher": extract-appimagetool (download config-name)
     #!/usr/bin/env ruby
     require "fileutils"; include FileUtils
     require "pathname"
@@ -65,6 +65,7 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     LIBDIR = File.join(APPDIR, "usr", "lib")
     EXECUTABLE_INSTALL_PATH = File.join(APPDIR, "AppRun") #File.join(BINDIR, XIVLAUNCHER_EXEC_NAME)
     BUSYBOX_INSTALL_PATH = File.join(BINDIR, "busybox")
+    ARIA2C_INSTALL_PATH = File.join(BINDIR, "aria2c")
 
     UPDATE_DATA = "gh-releases-zsync|spiteful-fox|xivlauncher-appimage|#{XIVLAUNCHER_RELEASE_TYPE}|#{XIVLAUNCHER_NAME}-x86_64.AppImage.zsync"
 
@@ -72,8 +73,8 @@ create-appimage config-name="xivlauncher": download-aria2c download-appimagetool
     cp_r "AppDir.template", APPDIR
     cp_r File.join(Dir.pwd, "src", "{{ config-name }}"), INSTALL_PATH
     cp File.join("resources", "xivlauncher.png"), ICON_PATH
-    cp "{{ aria2c }}", BINDIR
 
+    cp "{{ aria2c }}", ARIA2C_INSTALL_PATH
     cp "{{ busybox }}", BUSYBOX_INSTALL_PATH
     `"#{BUSYBOX_INSTALL_PATH}" --list`.split("\n").each{|e| ln_sf BUSYBOX_INSTALL_PATH.relative_to(BINDIR), File.join(BINDIR, e.strip)}
 
@@ -192,39 +193,13 @@ download config-name:
       `tar -xzf "#{dest}" -C "#{bin_extract_dir}"`
     end
 
-download-appimagetool:
+extract-appimagetool:
     #!/usr/bin/env bash
     set -ueox pipefail
-    mkdir -p "{{ tool_dir }}"
-
-    if [ ! -f "{{ appimagetool }}" ]; then
-        "{{ wget }}" "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-{{ arch() }}.AppImage" -O "{{ tool_dir }}/appimagetool"
-        chmod +x "{{ tool_dir }}/appimagetool"
-    fi
 
     if [ ! -d "{{ appimagetool }}.d" ]; then
         (cd {{ tool_dir }} && "{{ appimagetool }}" --appimage-extract)
         mv "{{ tool_dir }}/squashfs-root" "{{ tool_dir }}/appimagetool.d"
-    fi
-
-download-aria2c:
-    #!/usr/bin/env bash
-    set -ueox pipefail
-    mkdir -p "{{ tool_dir }}"
-
-    if [ ! -f "{{ aria2c }}" ]; then
-        "{{ wget }}" -qO- "https://github.com/abcfy2/aria2-static-build/releases/download/continuous/aria2-x86_64-linux-musl_static.zip" | zcat > "{{ aria2c }}"
-        chmod +x "{{ aria2c }}"
-    fi
-
-download-busybox:
-    #!/usr/bin/env bash
-    set -ueox pipefail
-    mkdir -p "{{ tool_dir }}"
-
-    if [ ! -f "{{ busybox }}" ]; then
-        "{{ wget }}" https://github.com/ruanformigoni/busybox-static-musl/releases/download/7e2c5b6/busybox-x86_64 -O "{{ busybox }}"
-        chmod +x "{{ busybox }}"
     fi
 
 download-imgui:
