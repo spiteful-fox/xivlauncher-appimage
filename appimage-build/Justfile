@@ -235,7 +235,7 @@ download-imgui:
     mkdir -p "{{ src_dir }}"
     mkdir -p "$build_dir"
 
-    cflags="-DIMGUI_USE_WCHAR32 -DIMGUI_ENABLE_FREETYPE=1 -DIMGUI_ENABLE_STB_TRUETYPE -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -fPIC -shared"
+    cflags="-DIMGUI_USE_WCHAR32 -DIMGUI_ENABLE_FREETYPE=1 -DIMGUI_ENABLE_STB_TRUETYPE -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -fPIC -O2 -shared"
     ldflags="-L$build_dir -Wl,--no-undefined"
 
 
