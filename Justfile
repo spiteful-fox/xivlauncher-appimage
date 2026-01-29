@@ -25,7 +25,7 @@ build-image rebuild="false":
     else
         if ! "{{ podman }}" image inspect {{ build_image }} >/dev/null 2>&1; then
             echo "Image not found, building..."
-            "{{ podman }}" build -t {{ build_image }} .
+            "{{ podman }}" build --no-cache -t {{ build_image }} .
         else
             echo "Image already exists, skipping build"
         fi

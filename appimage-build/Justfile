@@ -210,20 +210,20 @@ download-imgui:
     mkdir -p "{{ src_dir }}"
     mkdir -p "$build_dir"
 
-    cflags="-DIMGUI_USE_WCHAR32 -DIMGUI_ENABLE_FREETYPE=1 -DIMGUI_ENABLE_STB_TRUETYPE -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -fPIC -O2 -shared"
-    ldflags="-L$build_dir -Wl,--no-undefined"
+    cflags="-DIMGUI_USE_WCHAR32=1 -DIMGUI_ENABLE_FREETYPE=1 -DIMGUI_ENABLE_STB_TRUETYPE=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -fPIC -shared"
+    ldflags="-Wl,--no-undefined"
 
+    cimgui_cflags="-DCIMGUI_FREETYPE=1 -DCIMGUI_VARGS0 -DIMGUI_USER_CONFIG=\"{{ src_dir }}/cimgui/cimconfig.h\" $(pkg-config --cflags freetype2) $cflags"
+    cimgui_ldflags="$(pkg-config --libs freetype2) $ldflags"
 
     if [ ! -d "{{ src_dir }}/imgui" ]; then
         just git-clone https://github.com/ocornut/imgui {{ imgui_version }}
     fi
 
-    cimgui_cflags="-DCIMGUI_FREETYPE=1 -DCIMGUI_VARGS0 $(pkg-config --cflags freetype2) $cflags"
-    cimgui_ldflags="$(pkg-config --libs freetype2) $ldflags"
-
     if [ ! -x "$build_dir/cimgui.so" ]; then
         if [ ! -d "{{ src_dir }}/cimgui" ]; then
-            just git-clone https://github.com/cimgui/cimgui docking_inter
+            just git-clone https://github.com/JunaMeinhold/cimgui docking_inter
+            (cd "{{ src_dir }}/cimgui" && git checkout d61baefa0ce2a9db938ffdeb29e64f90f44cc037)
             rm -rf "{{ src_dir }}/cimgui/imgui"
             ln -s "{{ src_dir }}/imgui" "{{ src_dir }}/cimgui/imgui"
         fi
@@ -243,9 +243,8 @@ download-imgui:
 
     if [ ! -x "$build_dir/ImGuiImplSDL3.so" ]; then
         if [ ! -d "{{ src_dir }}/cimgui_impl" ]; then
-            just git-clone https://github.com/HexaEngine/cimgui_impl
-            rm -rf "{{ src_dir }}/cimgui_impl/imgui"
-            ln -s "{{ src_dir }}/imgui" "{{ src_dir }}/cimgui_impl/imgui"
+            just git-clone https://github.com/HexaEngine/cimgui_impl main
+            (cd "{{ src_dir }}/cimgui_impl" && git checkout 7a459f54179587dc923749fed44ae34f78c370d3 && git submodule update --init --recursive)
         fi
         cd "{{ src_dir }}/cimgui_impl"
         "{{ gcc }}" \
@@ -271,4 +270,4 @@ clean:
 @git-clone url branch="main" extra-args="" dest-name="":
     mkdir -p "{{ src_dir }}"
     echo "Cloning {{ url }}..."
-    cd "{{ src_dir }}" && "{{ git }}" clone -q "{{ url }}" --depth 1 --single-branch --branch "{{ branch }}" {{ extra-args }} {{ dest-name }}
+    cd "{{ src_dir }}" && "{{ git }}" clone -q "{{ url }}" --single-branch --branch "{{ branch }}" {{ extra-args }} {{ dest-name }}

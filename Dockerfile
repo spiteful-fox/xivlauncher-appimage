@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libsdl3-image-dev \
     libsecret-1-dev \
     libicu-dev \
+    libfreetype-dev \
     dpkg-dev \
     && rm -rf /var/lib/apt/lists/*
 
