@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
     fuse3 \
     luajit \
     libjxr-dev \
-    libsdl2-dev \
     libsdl3-dev \
     libsdl3-image-dev \
     libsecret-1-dev \
