@@ -11,7 +11,7 @@
     "remove_files": "libSDL3.so; libSDL3_image.so; cimgui.so; ImGuiImplSDL3.so"
   },
   "xivlauncher-rb": {
-    "version": "1.4.0.2",
+    "version": "1.4.0.5",
     "src": "https://github.com/rankynbass/XIVLauncher.Core/releases/download/rb-v%{version}/XIVLauncher.Core.tar.gz",
     "release_type": "latest-pre",
     "name": "XIVLauncher-RB",
